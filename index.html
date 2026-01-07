@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Visualisation der komplexen Zahlen</title>
+  <style>
+    body { font-family: sans-serif; }
+    canvas { border:10px solid black; margin-top:10px; }
+    input { width:200px; margin-right:10px; }
+  </style>
+</head>
+<body>
+
+<h2>Komplexe Zahlen-Repräsentation mit Vektoren</h2>
+
+<input id="numberInput" placeholder="Gib ein Zahl">
+<button onclick="addNumber()">Hinzufügen</button>
+
+<canvas id="complexCanvas" width="820" height="820"></canvas>
+
+<script>
+
+const complexCanvas = document.getElementById("complexCanvas");
+const ctxC = complexCanvas.getContext("2d");
+
+
+function isPrime(n) {
+  if (n < 2 || n % 1 !== 0) return false;
+  for(let i=2;i<=Math.sqrt(n);i++){
+    if(n%i===0) return false;
+  }
+  return true;
+}
+
+
+function drawComplexPlane() {
+  ctxC.clearRect(0,0,complexCanvas.width,complexCanvas.height);
+  const centerX = complexCanvas.width/2;
+  const centerY = complexCanvas.height/2;
+
+  const step = 40;
+  ctxC.strokeStyle = "#ccc";
+  ctxC.lineWidth = 1;
+
+
+  for(let x = centerX % step; x < complexCanvas.width; x += step){
+    ctxC.beginPath();
+    ctxC.moveTo(x,0);
+    ctxC.lineTo(x,complexCanvas.height);
+    ctxC.stroke();
+  }
+
+    for(let y = centerY % step; y < complexCanvas.height; y += step){
+    ctxC.beginPath();
+    ctxC.moveTo(0,y);
+    ctxC.lineTo(complexCanvas.width,y);
+    ctxC.stroke();
+  }
+
+  ctxC.strokeStyle = "black";
+  ctxC.lineWidth = 2;
+  
+  ctxC.beginPath();
+  ctxC.moveTo(0, centerY);
+  ctxC.lineTo(complexCanvas.width, centerY);
+  ctxC.stroke();
+
+  ctxC.beginPath();
+  ctxC.moveTo(centerX,0);
+  ctxC.lineTo(centerX,complexCanvas.height);
+  ctxC.stroke();
+
+  ctxC.fillStyle = "black";
+  ctxC.fillText("0", centerX+2, centerY+12);
+
+  ctxC.fillStyle = "black";
+  for(let i=-10;i<=10;i++){
+    if(i===0) continue;
+    let x = mapComplexX(i);
+    ctxC.fillText(i, x-5, centerY+15);
+    ctxC.beginPath();
+    ctxC.arc(x, centerY, 2, 0, Math.PI*2); // kis pont
+    ctxC.fill();
+  }
+
+  for(let i=-10;i<=10;i++){
+    if(i===0) continue;
+    let y = mapComplexY(i);
+    ctxC.fillText(i+"i", centerX+5, y+5);
+    ctxC.beginPath();
+    ctxC.arc(centerX, y, 2, 0, Math.PI*2);
+    ctxC.fill();
+  }
+}
+
+function mapComplexX(real){ return complexCanvas.width/2 + real*40; }
+function mapComplexY(imag){ return complexCanvas.height/2 - imag*40; }
+
+function drawVector(x, y, color="blue") {
+  const centerX = complexCanvas.width/2;
+  const centerY = complexCanvas.height/2;
+
+  ctxC.beginPath();
+  ctxC.moveTo(centerX, centerY);
+  ctxC.lineTo(x, y);
+  ctxC.strokeStyle = color;
+  ctxC.stroke();
+
+  ctxC.beginPath();
+  ctxC.arc(x, y, 6, 0, Math.PI*2);
+  ctxC.fillStyle = color;
+  ctxC.fill();
+}
+
+function addNumber() {
+  drawComplexPlane();
+
+  const input = document.getElementById("numberInput").value.trim();
+  if(!input) return;
+
+  let real = 0, imag = 0;
+
+  if(input.includes("i")){
+        let parts = input.replace(/\s/g,"").split(/(?=[+-])/);
+    for(let p of parts){
+      if(p.includes("i")) imag = parseFloat(p);
+      else real = parseFloat(p);
+    }
+  } else {
+    real = parseFloat(input);
+  }
+
+  let color = "blue";
+  if(imag !== 0) color = "purple";
+  else if(real < 0) color = "red";
+  else if(isPrime(real)) color = "green";
+
+  const xC = mapComplexX(real);
+  const yC = mapComplexY(imag);
+  drawVector(xC, yC, color);
+}
+
+drawComplexPlane();
+</script>
+
+</body>
+</html>
+
